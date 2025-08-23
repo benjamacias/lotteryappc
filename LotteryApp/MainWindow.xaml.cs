@@ -10,13 +10,19 @@ namespace LotteryApp;
 
 public partial class MainWindow : Window
 {
-    private AppDbContext _db = new();
+    private readonly AppDbContext _db = new();
 
     public MainWindow()
     {
         InitializeComponent();
         DbInitializer.EnsureCreatedAndSeed(_db);
         LoadClients();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _db.Dispose();
+        base.OnClosed(e);
     }
 
     private void LoadClients(string? filter = null)
@@ -52,7 +58,7 @@ public partial class MainWindow : Window
             PaymentsGrid.ItemsSource = null;
             BalanceLabel.Text = "Saldo: —";
             return;
-            }
+        }
         DebtsGrid.ItemsSource = SelectedClient.Debts.OrderByDescending(d => d.Date).ToList();
         PaymentsGrid.ItemsSource = SelectedClient.Payments.OrderByDescending(p => p.Date).ToList();
         BalanceLabel.Text = $"Saldo: {SelectedClient.Balance:C}";
@@ -128,12 +134,6 @@ public partial class MainWindow : Window
 
     private void ReloadClient(int id)
     {
-        var c = _db.Clients
-            .Include(x => x.Debts)
-            .Include(x => x.Payments)
-            .First(x => x.Id == id);
-        SelectClientById(id);
-        UpdateSelectionDetails();
         LoadClients(SearchBox.Text);
         SelectClientById(id);
     }
