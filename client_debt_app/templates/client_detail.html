@@ -8,7 +8,13 @@
   </head>
   <body>
     <div class="container py-4">
-      <h1 class="mb-4">Deudas de {{ client.name }}</h1>
+      <h1 class="mb-4">{{ client.name }}</h1>
+
+      <p><strong>Documento:</strong> {{ client.document }}</p>
+      <p><strong>Deuda total:</strong> ${{ '%.2f'|format(client.total_debt) }}</p>
+
+      <h2 class="mt-4">Deudas</h2>
+
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -27,6 +33,60 @@
           {% endfor %}
         </tbody>
       </table>
+
+      <h3>Agregar deuda</h3>
+      <form action="{{ url_for('add_debt', client_id=client.id) }}" method="post" class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label class="form-label">Fecha</label>
+          <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Monto</label>
+          <input type="number" step="0.01" name="amount" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Descripción</label>
+          <input type="text" name="description" class="form-control" required>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Agregar deuda</button>
+        </div>
+      </form>
+
+      <h2>Pagos</h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in client.payments %}
+          <tr>
+            <td>{{ p.date.strftime('%d/%m/%Y') }}</td>
+            <td>${{ '%.2f'|format(p.amount) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3>Agregar pago</h3>
+      <form action="{{ url_for('add_payment', client_id=client.id) }}" method="post" class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label">Fecha</label>
+          <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Monto</label>
+          <input type="number" step="0.01" name="amount" class="form-control" required>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-success">Agregar pago</button>
+        </div>
+      </form>
+
+
       <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver</a>
     </div>
   </body>
