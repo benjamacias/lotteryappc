@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+
+# SQLite database
+client_debt_app/clients.db
