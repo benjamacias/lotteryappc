@@ -60,6 +60,5 @@ def add_payment(client_id: int):
     db.session.commit()
     return redirect(url_for("client_detail", client_id=client.id))
 
-
 if __name__ == "__main__":
     app.run(debug=True)
