@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deudas de {{ client.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container py-4">
+      <h1 class="mb-4">Deudas de {{ client.name }}</h1>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in client.debts %}
+          <tr>
+            <td>{{ d.date.strftime('%d/%m/%Y') }}</td>
+            <td>${{ '%.2f'|format(d.amount) }}</td>
+            <td>{{ d.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver</a>
+    </div>
+  </body>
+</html>
