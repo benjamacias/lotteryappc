@@ -1,0 +1,23 @@
+<Window x:Class="LotteryApp.Views.MoneyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Movimiento" Height="260" Width="380" WindowStartupLocation="CenterOwner">
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <StackPanel Margin="0,0,0,12">
+      <DatePicker x:Name="DateBox" Margin="0,0,0,8" materialDesign:HintAssist.Hint="Fecha"/>
+      <TextBox x:Name="AmountBox" Margin="0,0,0,8" materialDesign:HintAssist.Hint="Monto"/>
+      <TextBox x:Name="DetailBox" Margin="0,0,0,8" materialDesign:HintAssist.Hint="Detalle"/>
+    </StackPanel>
+
+    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button Content="Cancelar" IsCancel="True" Margin="0,0,8,0"/>
+      <Button Content="Guardar" IsDefault="True" Click="Save_Click"/>
+    </StackPanel>
+  </Grid>
+</Window>

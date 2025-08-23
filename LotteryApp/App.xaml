@@ -1,0 +1,25 @@
+<Application x:Class="LotteryApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/BundledTheme.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Agregar clave -->
+      <materialDesign:BundledTheme x:Key="AppTheme"
+                                   BaseTheme="Light"
+                                   PrimaryColor="DeepPurple"
+                                   SecondaryColor="Lime" />
+
+      <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}" />
+      <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}" />
+      <Style TargetType="DatePicker" BasedOn="{StaticResource MaterialDesignDatePicker}" />
+      <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}" />
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>
