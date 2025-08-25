@@ -86,6 +86,28 @@
         </div>
       </form>
 
+      <h2>Movimientos</h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Acción</th>
+            <th>Monto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in client.movements %}
+          <tr>
+            <td>{{ m.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>{{ m.action }}</td>
+            <td>{% if m.amount %}${{ '%.2f'|format(m.amount) }}{% else %}-{% endif %}</td>
+            <td>{{ m.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
 
       <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver</a>
     </div>
