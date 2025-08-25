@@ -33,8 +33,12 @@ def login_required(fn):
 @login_required
 
 def index():
-    clients = Client.query.all()
-    return render_template("clients.html", clients=clients)
+    q = request.args.get("q", "")
+    if q:
+        clients = Client.query.filter(Client.name.ilike(f"%{q}%")).all()
+    else:
+        clients = Client.query.all()
+    return render_template("clients.html", clients=clients, q=q)
 
 
 @app.route("/client/new", methods=["GET", "POST"])
@@ -95,6 +99,42 @@ def add_payment(client_id: int):
     db.session.add(movement)
     db.session.commit()
     return redirect(url_for("client_detail", client_id=client.id))
+
+
+@app.route("/report")
+@login_required
+def report():
+    start_date_str = request.args.get("start_date")
+    end_date_str = request.args.get("end_date")
+    client_id = request.args.get("client_id")
+
+    query = Movement.query
+    start_date = None
+    end_date = None
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        query = query.filter(Movement.timestamp >= start_date)
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+        query = query.filter(Movement.timestamp <= end_date)
+    if client_id:
+        query = query.filter(Movement.client_id == int(client_id))
+
+    movements = query.order_by(Movement.timestamp.desc()).all()
+    total_debt = sum(m.amount or 0 for m in movements if m.action == "add_debt")
+    total_payment = sum(m.amount or 0 for m in movements if m.action == "add_payment")
+
+    clients = Client.query.all()
+    return render_template(
+        "report.html",
+        movements=movements,
+        clients=clients,
+        start_date=start_date_str,
+        end_date=end_date_str,
+        client_id=client_id,
+        total_debt=total_debt,
+        total_payment=total_payment,
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
