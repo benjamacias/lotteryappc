@@ -4,6 +4,7 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate
 from models import db, Client, Debt, Payment, User, Movement
 from forms import LoginForm, ClientForm, DebtForm, PaymentForm
 
@@ -15,6 +16,7 @@ csrf = CSRFProtect(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(app.root_path, "clients.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
