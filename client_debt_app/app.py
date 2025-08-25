@@ -3,6 +3,7 @@ from datetime import datetime, date
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate
 from models import db, Client, Debt, Payment, User, Movement
 
 app = Flask(__name__)
@@ -11,6 +12,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(app.root_path, "clients.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
