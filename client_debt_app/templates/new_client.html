@@ -10,15 +10,16 @@
     <div class="container py-4">
       <h1 class="mb-4">Nuevo cliente</h1>
       <form method="post">
+        {{ form.csrf_token }}
         <div class="mb-3">
-          <label class="form-label">Nombre</label>
-          <input type="text" name="name" class="form-control" required>
+          {{ form.name.label(class="form-label") }}
+          {{ form.name(class="form-control") }}
         </div>
         <div class="mb-3">
-          <label class="form-label">Documento</label>
-          <input type="text" name="document" class="form-control" required>
+          {{ form.document.label(class="form-label") }}
+          {{ form.document(class="form-control") }}
         </div>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        {{ form.submit(class="btn btn-primary") }}
         <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
       </form>
     </div>
