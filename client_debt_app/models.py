@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import date, datetime
 
 
+
 db = SQLAlchemy()
 
 
@@ -50,3 +51,4 @@ class Movement(db.Model):
     amount = db.Column(db.Float)
     description = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+

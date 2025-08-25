@@ -7,6 +7,7 @@ from models import db, Client, Debt, Payment, User, Movement
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(app.root_path, "clients.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
@@ -30,6 +31,7 @@ def login_required(fn):
 
 @app.route("/")
 @login_required
+
 def index():
     clients = Client.query.all()
     return render_template("clients.html", clients=clients)
@@ -37,6 +39,7 @@ def index():
 
 @app.route("/client/new", methods=["GET", "POST"])
 @login_required
+
 def new_client():
     if request.method == "POST":
         name = request.form["name"]
@@ -47,12 +50,14 @@ def new_client():
         movement = Movement(user_id=session.get("user_id"), client=client, action="create_client", description=f"Cliente {name} creado")
         db.session.add(movement)
         db.session.commit()
+
         return redirect(url_for("index"))
     return render_template("new_client.html")
 
 
 @app.route("/client/<int:client_id>")
 @login_required
+
 def client_detail(client_id: int):
     client = Client.query.get_or_404(client_id)
     return render_template("client_detail.html", client=client)
@@ -60,6 +65,7 @@ def client_detail(client_id: int):
 
 @app.route("/client/<int:client_id>/debts", methods=["POST"])
 @login_required
+
 def add_debt(client_id: int):
     client = Client.query.get_or_404(client_id)
     amount = float(request.form["amount"])
@@ -70,12 +76,14 @@ def add_debt(client_id: int):
     db.session.add(debt)
     movement = Movement(user_id=session.get("user_id"), client=client, action="add_debt", amount=amount, description=description)
     db.session.add(movement)
+
     db.session.commit()
     return redirect(url_for("client_detail", client_id=client.id))
 
 
 @app.route("/client/<int:client_id>/payments", methods=["POST"])
 @login_required
+
 def add_payment(client_id: int):
     client = Client.query.get_or_404(client_id)
     amount = float(request.form["amount"])
@@ -106,6 +114,7 @@ def login():
 def logout():
     session.pop("user_id", None)
     return redirect(url_for("login"))
+
 
 
 if __name__ == "__main__":
