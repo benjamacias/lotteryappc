@@ -7,7 +7,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from sqlalchemy import inspect, text
 from models import db, Client, Debt, Payment, User, Movement
-from forms import LoginForm, ClientForm, DebtForm, PaymentForm, WithdrawalForm
+from forms import (
+    LoginForm,
+    ClientForm,
+    DebtForm,
+    DebtClientForm,
+    PaymentForm,
+    WithdrawalForm,
+    IncomeForm,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
@@ -173,13 +181,24 @@ def add_payment(client_id: int):
 @login_required
 @admin_required
 def cash():
-    form = WithdrawalForm()
-    if form.validate_on_submit():
+    withdraw_form = WithdrawalForm(prefix="withdraw")
+    income_form = IncomeForm(prefix="income")
+    if withdraw_form.submit.data and withdraw_form.validate_on_submit():
         movement = Movement(
             user_id=session.get("user_id"),
             action="cash_withdrawal",
-            amount=form.amount.data,
-            description=form.description.data,
+            amount=withdraw_form.amount.data,
+            description=withdraw_form.description.data,
+        )
+        db.session.add(movement)
+        db.session.commit()
+        return redirect(url_for("cash"))
+    if income_form.submit.data and income_form.validate_on_submit():
+        movement = Movement(
+            user_id=session.get("user_id"),
+            action="cash_income",
+            amount=income_form.amount.data,
+            description=income_form.description.data,
         )
         db.session.add(movement)
         db.session.commit()
@@ -194,19 +213,25 @@ def cash():
     payments = Payment.query.filter(Payment.date == selected_date).all()
     withdrawals_all = Movement.query.filter_by(action="cash_withdrawal").all()
     withdrawals = [w for w in withdrawals_all if w.timestamp.date() == selected_date]
+    incomes_all = Movement.query.filter_by(action="cash_income").all()
+    incomes = [i for i in incomes_all if i.timestamp.date() == selected_date]
 
-    total_cash = sum(p.amount for p in payments if p.method == "cash")
+    total_payments = sum(p.amount for p in payments if p.method == "cash")
+    total_incomes = sum(i.amount for i in incomes)
     total_withdrawals = sum(w.amount for w in withdrawals)
-    cash_total = total_cash - total_withdrawals
+    cash_total = total_payments + total_incomes - total_withdrawals
 
     return render_template(
         "cash.html",
         payments=payments,
         withdrawals=withdrawals,
-        form=form,
+        incomes=incomes,
+        withdraw_form=withdraw_form,
+        income_form=income_form,
         date=selected_date,
-        total_cash=total_cash,
+        total_payments=total_payments,
         total_withdrawals=total_withdrawals,
+        total_incomes=total_incomes,
         cash_total=cash_total,
     )
 
@@ -242,9 +267,37 @@ def report():
         start_date=start_date_str,
         end_date=end_date_str,
         client_id=client_id,
-        total_debt=total_debt,
-        total_payment=total_payment,
+    total_debt=total_debt,
+    total_payment=total_payment,
     )
+
+
+@app.route("/deudas/nueva", methods=["GET", "POST"])
+@login_required
+@admin_required
+def new_debt():
+    form = DebtClientForm()
+    form.client_id.choices = [(c.id, c.name) for c in Client.query.all()]
+    if form.validate_on_submit():
+        client = Client.query.get_or_404(form.client_id.data)
+        debt = Debt(
+            client=client,
+            amount=form.amount.data,
+            description=form.description.data,
+            date=form.date.data or date.today(),
+        )
+        db.session.add(debt)
+        movement = Movement(
+            user_id=session.get("user_id"),
+            client=client,
+            action="add_debt",
+            amount=form.amount.data,
+            description=form.description.data,
+        )
+        db.session.add(movement)
+        db.session.commit()
+        return redirect(url_for("debts"))
+    return render_template("new_debt.html", form=form)
 
 
 @app.route("/deudas")

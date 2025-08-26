@@ -30,7 +30,28 @@
       {% endfor %}
     </tbody>
   </table>
-  <div class="mb-4 font-semibold">Total efectivo: ${{ '%.2f'|format(total_cash) }}</div>
+  <div class="mb-4 font-semibold">Total efectivo: ${{ '%.2f'|format(total_payments) }}</div>
+
+  <h2 class="text-xl font-semibold mb-2">Ingresos</h2>
+  <table class="min-w-full bg-white mb-4">
+    <thead>
+      <tr class="border-b">
+        <th class="text-left py-2 px-3">Fecha</th>
+        <th class="text-left py-2 px-3">Monto</th>
+        <th class="text-left py-2 px-3">Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in incomes %}
+      <tr class="border-b">
+        <td class="py-2 px-3">{{ i.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td class="py-2 px-3">${{ '%.2f'|format(i.amount) }}</td>
+        <td class="py-2 px-3">{{ i.description or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="mb-4 font-semibold">Total ingresos: ${{ '%.2f'|format(total_incomes) }}</div>
 
   <h2 class="text-xl font-semibold mb-2">Retiros</h2>
   <table class="min-w-full bg-white mb-4">
@@ -53,19 +74,35 @@
   </table>
   <div class="mb-4 font-semibold">Total retiros: ${{ '%.2f'|format(total_withdrawals) }}</div>
 
-  <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
+  <h3 class="text-lg font-semibold mb-2">Ingresar efectivo</h3>
   <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    {{ form.csrf_token }}
+    {{ income_form.csrf_token }}
     <div>
-      {{ form.amount.label(class="block mb-1") }}
-      {{ form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+      {{ income_form.amount.label(class="block mb-1") }}
+      {{ income_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
     </div>
     <div class="md:col-span-2">
-      {{ form.description.label(class="block mb-1") }}
-      {{ form.description(class="border rounded w-full px-3 py-2") }}
+      {{ income_form.description.label(class="block mb-1") }}
+      {{ income_form.description(class="border rounded w-full px-3 py-2") }}
     </div>
     <div class="md:col-span-3">
-      {{ form.submit(class="bg-yellow-500 text-white px-4 py-2 rounded") }}
+      {{ income_form.submit(class="bg-green-500 text-white px-4 py-2 rounded") }}
+    </div>
+  </form>
+
+  <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
+  <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    {{ withdraw_form.csrf_token }}
+    <div>
+      {{ withdraw_form.amount.label(class="block mb-1") }}
+      {{ withdraw_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+    </div>
+    <div class="md:col-span-2">
+      {{ withdraw_form.description.label(class="block mb-1") }}
+      {{ withdraw_form.description(class="border rounded w-full px-3 py-2") }}
+    </div>
+    <div class="md:col-span-3">
+      {{ withdraw_form.submit(class="bg-yellow-500 text-white px-4 py-2 rounded") }}
     </div>
   </form>
 
