@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from sqlalchemy import inspect, text
 from models import db, Client, Debt, Payment, User, Movement
 from forms import LoginForm, ClientForm, DebtForm, PaymentForm, WithdrawalForm
 
@@ -21,6 +22,18 @@ migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
+
+    inspector = inspect(db.engine)
+    if "payment" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("payment")]
+        if "method" not in columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE payment ADD COLUMN method VARCHAR(20) NOT NULL DEFAULT 'cash'"
+                )
+            )
+            db.session.commit()
+
     if not User.query.first():
         admin = User(
             username="admin",
