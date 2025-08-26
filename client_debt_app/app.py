@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from sqlalchemy import inspect, text
 from models import db, Client, Debt, Payment, User, Movement
 from forms import LoginForm, ClientForm, DebtForm, PaymentForm, WithdrawalForm
 
@@ -21,6 +22,18 @@ migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
+
+    inspector = inspect(db.engine)
+    if "payment" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("payment")]
+        if "method" not in columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE payment ADD COLUMN method VARCHAR(20) NOT NULL DEFAULT 'cash'"
+                )
+            )
+            db.session.commit()
+
     if not User.query.first():
         admin = User(
             username="admin",
@@ -239,24 +252,6 @@ def report():
 def debts():
     debts = Debt.query.order_by(Debt.date.desc()).all()
     return render_template("debts.html", debts=debts)
-
-
-@app.route("/caja")
-@login_required
-def cash():
-    today = date.today()
-    start = datetime.combine(today, datetime.min.time())
-    end = datetime.combine(today, datetime.max.time())
-    movements = (
-        Movement.query.filter(Movement.timestamp.between(start, end))
-        .order_by(Movement.timestamp.asc())
-        .all()
-    )
-    total_in = sum(m.amount or 0 for m in movements if m.action == "add_payment")
-    total_out = sum(m.amount or 0 for m in movements if m.action == "add_debt")
-    return render_template(
-        "cash.html", movements=movements, total_in=total_in, total_out=total_out
-    )
 
 
 @app.route("/graficos")
