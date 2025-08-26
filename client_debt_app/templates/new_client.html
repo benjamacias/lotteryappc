@@ -1,27 +1,20 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nuevo cliente</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body>
-    <div class="container py-4">
-      <h1 class="mb-4">Nuevo cliente</h1>
-      <form method="post">
-        {{ form.csrf_token }}
-        <div class="mb-3">
-          {{ form.name.label(class="form-label") }}
-          {{ form.name(class="form-control") }}
-        </div>
-        <div class="mb-3">
-          {{ form.document.label(class="form-label") }}
-          {{ form.document(class="form-control") }}
-        </div>
-        {{ form.submit(class="btn btn-primary") }}
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
-      </form>
+{% extends 'layout.html' %}
+{% block title %}Nuevo cliente{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Nuevo cliente</h1>
+  <form method="post" class="space-y-4">
+    {{ form.csrf_token }}
+    <div>
+      {{ form.name.label(class="block mb-1") }}
+      {{ form.name(class="border rounded w-full px-3 py-2") }}
     </div>
-  </body>
-</html>
+    <div>
+      {{ form.document.label(class="block mb-1") }}
+      {{ form.document(class="border rounded w-full px-3 py-2") }}
+    </div>
+    <div class="space-x-2">
+      {{ form.submit(class="bg-blue-500 text-white px-4 py-2 rounded") }}
+      <a href="{{ url_for('index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}
