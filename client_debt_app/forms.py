@@ -1,5 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FloatField, DateField, SubmitField
+from wtforms import (
+    StringField,
+    PasswordField,
+    FloatField,
+    DateField,
+    SubmitField,
+    SelectField,
+)
 from wtforms.validators import DataRequired, Length, NumberRange
 
 
@@ -25,4 +32,19 @@ class DebtForm(FlaskForm):
 class PaymentForm(FlaskForm):
     date = DateField("Fecha", validators=[DataRequired()], format="%Y-%m-%d")
     amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
+    method = SelectField(
+        "Método",
+        choices=[
+            ("cash", "Efectivo"),
+            ("transfer", "Transferencia"),
+            ("other", "Otros"),
+        ],
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Agregar pago")
+
+
+class WithdrawalForm(FlaskForm):
+    amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
+    description = StringField("Descripción", validators=[Length(max=200)])
+    submit = SubmitField("Retirar")

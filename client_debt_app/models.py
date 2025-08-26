@@ -34,6 +34,15 @@ class Payment(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey("client.id"), nullable=False)
     date = db.Column(db.Date, nullable=False, default=date.today)
     amount = db.Column(db.Float, nullable=False)
+    method = db.Column(db.String(20), nullable=False, default="cash")
+
+    @property
+    def method_label(self) -> str:
+        return {
+            "cash": "Efectivo",
+            "transfer": "Transferencia",
+            "other": "Otros",
+        }.get(self.method, self.method)
 
 
 class User(db.Model):

@@ -10,7 +10,10 @@
     <div class="container py-4">
       <div class="d-flex justify-content-between mb-4">
         <h1 class="m-0">Clientes</h1>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Salir</a>
+        <div>
+          <a href="{{ url_for('cash') }}" class="btn btn-outline-primary">Caja</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Salir</a>
+        </div>
       </div>
       <a href="{{ url_for('new_client') }}" class="btn btn-primary mb-3">Nuevo cliente</a>
 

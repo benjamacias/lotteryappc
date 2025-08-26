@@ -6,7 +6,7 @@ from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from models import db, Client, Debt, Payment, User, Movement
-from forms import LoginForm, ClientForm, DebtForm, PaymentForm
+from forms import LoginForm, ClientForm, DebtForm, PaymentForm, WithdrawalForm
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
@@ -134,7 +134,12 @@ def add_payment(client_id: int):
     client = Client.query.get_or_404(client_id)
     form = PaymentForm()
     if form.validate_on_submit():
-        payment = Payment(client=client, amount=form.amount.data, date=form.date.data)
+        payment = Payment(
+            client=client,
+            amount=form.amount.data,
+            date=form.date.data,
+            method=form.method.data,
+        )
         db.session.add(payment)
         movement = Movement(
             user_id=session.get("user_id"),
@@ -148,6 +153,48 @@ def add_payment(client_id: int):
     debt_form = DebtForm()
     return render_template(
         "client_detail.html", client=client, debt_form=debt_form, payment_form=form
+    )
+
+
+@app.route("/cash", methods=["GET", "POST"])
+@login_required
+@admin_required
+def cash():
+    form = WithdrawalForm()
+    if form.validate_on_submit():
+        movement = Movement(
+            user_id=session.get("user_id"),
+            action="cash_withdrawal",
+            amount=form.amount.data,
+            description=form.description.data,
+        )
+        db.session.add(movement)
+        db.session.commit()
+        return redirect(url_for("cash"))
+
+    date_str = request.args.get("date")
+    if date_str:
+        selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    else:
+        selected_date = date.today()
+
+    payments = Payment.query.filter(Payment.date == selected_date).all()
+    withdrawals_all = Movement.query.filter_by(action="cash_withdrawal").all()
+    withdrawals = [w for w in withdrawals_all if w.timestamp.date() == selected_date]
+
+    total_cash = sum(p.amount for p in payments if p.method == "cash")
+    total_withdrawals = sum(w.amount for w in withdrawals)
+    cash_total = total_cash - total_withdrawals
+
+    return render_template(
+        "cash.html",
+        payments=payments,
+        withdrawals=withdrawals,
+        form=form,
+        date=selected_date,
+        total_cash=total_cash,
+        total_withdrawals=total_withdrawals,
+        cash_total=cash_total,
     )
 
 

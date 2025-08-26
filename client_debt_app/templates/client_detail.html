@@ -60,6 +60,7 @@
           <tr>
             <th>Fecha</th>
             <th>Monto</th>
+            <th>Método</th>
           </tr>
         </thead>
         <tbody>
@@ -67,6 +68,7 @@
           <tr>
             <td>{{ p.date.strftime('%d/%m/%Y') }}</td>
             <td>${{ '%.2f'|format(p.amount) }}</td>
+            <td>{{ p.method_label }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -82,6 +84,10 @@
         <div class="col-md-4">
           {{ payment_form.amount.label(class="form-label") }}
           {{ payment_form.amount(class="form-control", step="0.01") }}
+        </div>
+        <div class="col-md-4">
+          {{ payment_form.method.label(class="form-label") }}
+          {{ payment_form.method(class="form-select") }}
         </div>
         <div class="col-12">
           {{ payment_form.submit(class="btn btn-success") }}
