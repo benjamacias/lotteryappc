@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block title %}Deudas{% endblock %}
+{% block content %}
+  <h1 class="mb-4">Deudas</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Monto</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in debts %}
+      <tr>
+        <td>{{ d.date.strftime('%Y-%m-%d') }}</td>
+        <td>{{ d.client.name }}</td>
+        <td>${{ '%.2f'|format(d.amount) }}</td>
+        <td>{{ d.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
