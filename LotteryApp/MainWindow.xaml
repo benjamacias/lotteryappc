@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:views="clr-namespace:LotteryApp.Views"
         mc:Ignorable="d"
         Title="Lotería - Clientes, Deudas y Pagos"
         Width="1100" Height="680"
@@ -11,10 +12,13 @@
   <Grid Margin="12">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
-    <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
+    <views:HeaderControl Grid.Row="0" Margin="0,0,0,8"/>
+
+    <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,0,0,8">
       <TextBox x:Name="SearchBox" Width="320" materialDesign:HintAssist.Hint="Buscar cliente" Margin="0,0,8,0" KeyUp="SearchBox_KeyUp"/>
       <Button Content="Nuevo cliente" Click="NewClient_Click" Margin="0,0,8,0"/>
       <Button Content="Editar" Click="EditClient_Click" Margin="0,0,8,0"/>
@@ -22,12 +26,11 @@
       <Separator Width="12"/>
       <Button Content="Agregar deuda" Click="AddDebt_Click" Margin="0,0,8,0"/>
       <Button Content="Registrar pago" Click="AddPayment_Click" Margin="0,0,8,0"/>
-      <Button Content="Caja diaria" Click="CashDaily_Click" Margin="0,0,8,0"/>
       <Separator Width="12"/>
       <TextBlock x:Name="BalanceLabel" VerticalAlignment="Center" FontWeight="Bold"/>
     </DockPanel>
 
-    <Grid Grid.Row="1">
+    <Grid Grid.Row="2">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="3*"/>
         <ColumnDefinition Width="2*"/>
