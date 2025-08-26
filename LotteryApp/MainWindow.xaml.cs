@@ -132,12 +132,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void CashDaily_Click(object sender, RoutedEventArgs e)
-    {
-        var w = new Views.CashWindow();
-        w.ShowDialog();
-    }
-
     private void ReloadClient(int id)
     {
         LoadClients(SearchBox.Text);
