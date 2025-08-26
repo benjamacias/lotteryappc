@@ -123,13 +123,19 @@ public partial class MainWindow : Window
     private void AddPayment_Click(object sender, RoutedEventArgs e)
     {
         if (SelectedClient == null) return;
-        var w = new Views.MoneyWindow("Nuevo pago", "Medio");
+        var w = new Views.PaymentWindow();
         if (w.ShowDialog() == true)
         {
-            _db.Payments.Add(new Payment { ClientId = SelectedClient.Id, Date = w.When, Amount = w.Amount, Method = w.Detail });
+            _db.Payments.Add(new Payment { ClientId = SelectedClient.Id, Date = w.When, Amount = w.Amount, Method = w.Method, Notes = w.Notes });
             _db.SaveChanges();
             ReloadClient(SelectedClient.Id);
         }
+    }
+
+    private void CashDaily_Click(object sender, RoutedEventArgs e)
+    {
+        var w = new Views.CashWindow();
+        w.ShowDialog();
     }
 
     private void ReloadClient(int id)
