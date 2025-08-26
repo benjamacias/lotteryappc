@@ -92,10 +92,13 @@ def admin_required(fn):
     return wrapper
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
-
 def index():
+    if request.method == "POST":
+        q = request.form.get("q", "")
+        return redirect(url_for("index", q=q))
+
     q = request.args.get("q", "")
     if q:
         clients = Client.query.filter(Client.name.ilike(f"%{q}%")).all()
