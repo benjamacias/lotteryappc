@@ -74,6 +74,7 @@
   </table>
   <div class="mb-4 font-semibold">Total retiros: ${{ '%.2f'|format(total_withdrawals) }}</div>
 
+  {% if is_admin %}
   <h3 class="text-lg font-semibold mb-2">Ingresar efectivo</h3>
   <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     {{ income_form.csrf_token }}
@@ -89,6 +90,7 @@
       {{ income_form.submit(class="bg-green-500 text-white px-4 py-2 rounded") }}
     </div>
   </form>
+  {% endif %}
 
   <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
   <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
