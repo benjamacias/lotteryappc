@@ -241,24 +241,6 @@ def debts():
     return render_template("debts.html", debts=debts)
 
 
-@app.route("/caja")
-@login_required
-def cash():
-    today = date.today()
-    start = datetime.combine(today, datetime.min.time())
-    end = datetime.combine(today, datetime.max.time())
-    movements = (
-        Movement.query.filter(Movement.timestamp.between(start, end))
-        .order_by(Movement.timestamp.asc())
-        .all()
-    )
-    total_in = sum(m.amount or 0 for m in movements if m.action == "add_payment")
-    total_out = sum(m.amount or 0 for m in movements if m.action == "add_debt")
-    return render_template(
-        "cash.html", movements=movements, total_in=total_in, total_out=total_out
-    )
-
-
 @app.route("/graficos")
 @login_required
 def charts():
