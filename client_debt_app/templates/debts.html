@@ -1,23 +1,23 @@
 {% extends 'layout.html' %}
 {% block title %}Deudas{% endblock %}
 {% block content %}
-  <h1 class="mb-4">Deudas</h1>
-  <table class="table table-striped">
+  <h1 class="text-2xl font-bold mb-4">Deudas</h1>
+  <table class="min-w-full bg-white">
     <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Cliente</th>
-        <th>Monto</th>
-        <th>Descripción</th>
+      <tr class="border-b">
+        <th class="text-left py-2 px-3">Fecha</th>
+        <th class="text-left py-2 px-3">Cliente</th>
+        <th class="text-left py-2 px-3">Monto</th>
+        <th class="text-left py-2 px-3">Descripción</th>
       </tr>
     </thead>
     <tbody>
       {% for d in debts %}
-      <tr>
-        <td>{{ d.date.strftime('%Y-%m-%d') }}</td>
-        <td>{{ d.client.name }}</td>
-        <td>${{ '%.2f'|format(d.amount) }}</td>
-        <td>{{ d.description }}</td>
+      <tr class="border-b">
+        <td class="py-2 px-3">{{ d.date.strftime('%Y-%m-%d') }}</td>
+        <td class="py-2 px-3">{{ d.client.name }}</td>
+        <td class="py-2 px-3">${{ '%.2f'|format(d.amount) }}</td>
+        <td class="py-2 px-3">{{ d.description }}</td>
       </tr>
       {% endfor %}
     </tbody>

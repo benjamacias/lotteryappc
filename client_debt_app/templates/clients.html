@@ -1,47 +1,32 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Clientes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body>
-    <div class="container py-4">
-      <div class="d-flex justify-content-between mb-4">
-        <h1 class="m-0">Clientes</h1>
-        <div>
-          <a href="{{ url_for('cash') }}" class="btn btn-outline-primary">Caja</a>
-          <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Salir</a>
-        </div>
-      </div>
-      <a href="{{ url_for('new_client') }}" class="btn btn-primary mb-3">Nuevo cliente</a>
-
-  <form method="get" class="mb-3">
-    <div class="input-group">
-      <input type="text" name="q" class="form-control" placeholder="Buscar por nombre" value="{{ q or '' }}">
-      <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+{% extends 'layout.html' %}
+{% block title %}Clientes{% endblock %}
+{% block content %}
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Clientes</h1>
+    <a href="{{ url_for('new_client') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Nuevo cliente</a>
+  </div>
+  <form method="get" class="mb-4">
+    <div class="flex">
+      <input type="text" name="q" class="border rounded-l px-4 py-2 w-full" placeholder="Buscar por nombre" value="{{ q or '' }}">
+      <button class="bg-gray-200 px-4 py-2 rounded-r" type="submit">Buscar</button>
     </div>
   </form>
-
-  <table class="table table-striped">
+  <table class="min-w-full bg-white">
     <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Documento</th>
-        <th>Deuda total</th>
+      <tr class="border-b">
+        <th class="text-left py-2 px-3">Nombre</th>
+        <th class="text-left py-2 px-3">Documento</th>
+        <th class="text-left py-2 px-3">Deuda total</th>
       </tr>
     </thead>
     <tbody>
       {% for c in clients %}
-      <tr>
-        <td><a href="{{ url_for('client_detail', client_id=c.id) }}">{{ c.name }}</a></td>
-        <td>{{ c.document }}</td>
-        <td>${{ '%.2f'|format(c.total_debt) }}</td>
+      <tr class="border-b">
+        <td class="py-2 px-3"><a href="{{ url_for('client_detail', client_id=c.id) }}" class="text-blue-600 hover:underline">{{ c.name }}</a></td>
+        <td class="py-2 px-3">{{ c.document }}</td>
+        <td class="py-2 px-3">${{ '%.2f'|format(c.total_debt) }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-    </div>
-  </body>
-</html>
+{% endblock %}

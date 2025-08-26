@@ -1,85 +1,75 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Caja diaria</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body>
-    <div class="container py-4">
-      <h1 class="mb-4">Caja diaria</h1>
-      <form method="get" class="mb-4">
-        <div class="input-group" style="max-width: 300px;">
-          <input type="date" name="date" class="form-control" value="{{ date.strftime('%Y-%m-%d') }}">
-          <button class="btn btn-primary" type="submit">Cambiar</button>
-        </div>
-      </form>
-
-      <h2>Pagos</h2>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Monto</th>
-            <th>Método</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in payments %}
-          <tr>
-            <td>{{ p.client.name }}</td>
-            <td>{{ p.date.strftime('%d/%m/%Y') }}</td>
-            <td>${{ '%.2f'|format(p.amount) }}</td>
-            <td>{{ p.method_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div class="mb-4"><strong>Total efectivo:</strong> ${{ '%.2f'|format(total_cash) }}</div>
-
-      <h2>Retiros</h2>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Monto</th>
-            <th>Descripción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for w in withdrawals %}
-          <tr>
-            <td>{{ w.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
-            <td>${{ '%.2f'|format(w.amount) }}</td>
-            <td>{{ w.description or '' }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div class="mb-4"><strong>Total retiros:</strong> ${{ '%.2f'|format(total_withdrawals) }}</div>
-
-      <h3>Retirar efectivo</h3>
-      <form method="post" class="row g-3 mb-4">
-        {{ form.csrf_token }}
-        <div class="col-md-4">
-          {{ form.amount.label(class="form-label") }}
-          {{ form.amount(class="form-control", step="0.01") }}
-        </div>
-        <div class="col-md-6">
-          {{ form.description.label(class="form-label") }}
-          {{ form.description(class="form-control") }}
-        </div>
-        <div class="col-12">
-          {{ form.submit(class="btn btn-warning") }}
-        </div>
-      </form>
-
-      <div class="mb-4"><strong>Total en caja:</strong> ${{ '%.2f'|format(cash_total) }}</div>
-
-      <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver</a>
+{% extends 'layout.html' %}
+{% block title %}Caja diaria{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Caja diaria</h1>
+  <form method="get" class="mb-4">
+    <div class="flex max-w-sm">
+      <input type="date" name="date" class="border rounded-l px-3 py-2 w-full" value="{{ date.strftime('%Y-%m-%d') }}">
+      <button class="bg-blue-500 text-white px-4 py-2 rounded-r" type="submit">Cambiar</button>
     </div>
-  </body>
-</html>
+  </form>
 
+  <h2 class="text-xl font-semibold mb-2">Pagos</h2>
+  <table class="min-w-full bg-white mb-4">
+    <thead>
+      <tr class="border-b">
+        <th class="text-left py-2 px-3">Cliente</th>
+        <th class="text-left py-2 px-3">Fecha</th>
+        <th class="text-left py-2 px-3">Monto</th>
+        <th class="text-left py-2 px-3">Método</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payments %}
+      <tr class="border-b">
+        <td class="py-2 px-3">{{ p.client.name }}</td>
+        <td class="py-2 px-3">{{ p.date.strftime('%d/%m/%Y') }}</td>
+        <td class="py-2 px-3">${{ '%.2f'|format(p.amount) }}</td>
+        <td class="py-2 px-3">{{ p.method_label }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="mb-4 font-semibold">Total efectivo: ${{ '%.2f'|format(total_cash) }}</div>
+
+  <h2 class="text-xl font-semibold mb-2">Retiros</h2>
+  <table class="min-w-full bg-white mb-4">
+    <thead>
+      <tr class="border-b">
+        <th class="text-left py-2 px-3">Fecha</th>
+        <th class="text-left py-2 px-3">Monto</th>
+        <th class="text-left py-2 px-3">Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for w in withdrawals %}
+      <tr class="border-b">
+        <td class="py-2 px-3">{{ w.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td class="py-2 px-3">${{ '%.2f'|format(w.amount) }}</td>
+        <td class="py-2 px-3">{{ w.description or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="mb-4 font-semibold">Total retiros: ${{ '%.2f'|format(total_withdrawals) }}</div>
+
+  <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
+  <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    {{ form.csrf_token }}
+    <div>
+      {{ form.amount.label(class="block mb-1") }}
+      {{ form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+    </div>
+    <div class="md:col-span-2">
+      {{ form.description.label(class="block mb-1") }}
+      {{ form.description(class="border rounded w-full px-3 py-2") }}
+    </div>
+    <div class="md:col-span-3">
+      {{ form.submit(class="bg-yellow-500 text-white px-4 py-2 rounded") }}
+    </div>
+  </form>
+
+  <div class="mb-4 font-semibold">Total en caja: ${{ '%.2f'|format(cash_total) }}</div>
+
+  <a href="{{ url_for('index') }}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded">Volver</a>
+{% endblock %}
