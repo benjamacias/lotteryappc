@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Debt> Debts => Set<Debt>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<CashMovement> CashMovements => Set<CashMovement>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

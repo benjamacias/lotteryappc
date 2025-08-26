@@ -22,6 +22,7 @@
       <Separator Width="12"/>
       <Button Content="Agregar deuda" Click="AddDebt_Click" Margin="0,0,8,0"/>
       <Button Content="Registrar pago" Click="AddPayment_Click" Margin="0,0,8,0"/>
+      <Button Content="Caja diaria" Click="CashDaily_Click" Margin="0,0,8,0"/>
       <Separator Width="12"/>
       <TextBlock x:Name="BalanceLabel" VerticalAlignment="Center" FontWeight="Bold"/>
     </DockPanel>

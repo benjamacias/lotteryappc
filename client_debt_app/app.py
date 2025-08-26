@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, date
+from datetime import date, datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_wtf import CSRFProtect
@@ -15,6 +15,7 @@ csrf = CSRFProtect(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(app.root_path, "clients.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["WTF_CSRF_ENABLED"] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
@@ -23,7 +24,7 @@ with app.app_context():
     if not User.query.first():
         admin = User(
             username="admin",
-            password_hash=bcrypt.generate_password_hash("admin").decode("utf-8"),
+            password_hash=generate_password_hash("admin"),
             role="admin",
         )
         db.session.add(admin)
@@ -205,7 +206,7 @@ def register():
         password = request.form["password"]
         if User.query.filter_by(username=username).first():
             return render_template("register.html", error="Usuario ya existe")
-        pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+        pw_hash = generate_password_hash(password)
         user = User(username=username, password_hash=pw_hash, role="user")
         db.session.add(user)
         db.session.commit()
