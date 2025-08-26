@@ -29,6 +29,14 @@ class DebtForm(FlaskForm):
     submit = SubmitField("Agregar deuda")
 
 
+class DebtClientForm(FlaskForm):
+    client_id = SelectField("Cliente", coerce=int, validators=[DataRequired()])
+    date = DateField("Fecha", validators=[DataRequired()], format="%Y-%m-%d")
+    amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
+    description = StringField("Descripción", validators=[DataRequired(), Length(max=200)])
+    submit = SubmitField("Agregar deuda")
+
+
 class PaymentForm(FlaskForm):
     date = DateField("Fecha", validators=[DataRequired()], format="%Y-%m-%d")
     amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
@@ -48,3 +56,9 @@ class WithdrawalForm(FlaskForm):
     amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
     description = StringField("Descripción", validators=[Length(max=200)])
     submit = SubmitField("Retirar")
+
+
+class IncomeForm(FlaskForm):
+    amount = FloatField("Monto", validators=[DataRequired(), NumberRange(min=0)])
+    description = StringField("Descripción", validators=[Length(max=200)])
+    submit = SubmitField("Ingresar")
