@@ -42,6 +42,26 @@ with app.app_context():
             )
             db.session.commit()
 
+    if "user" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("user")]
+        if "role" not in columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE user ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user'"
+                )
+            )
+            db.session.commit()
+
+    if "movement" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("movement")]
+        if "user_id" not in columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE movement ADD COLUMN user_id INTEGER REFERENCES user(id)"
+                )
+            )
+            db.session.commit()
+
     if not User.query.first():
         admin = User(
             username="admin",
@@ -179,13 +199,13 @@ def add_payment(client_id: int):
 
 @app.route("/cash", methods=["GET", "POST"])
 @login_required
-@admin_required
 def cash():
+    user = User.query.get(session.get("user_id"))
     withdraw_form = WithdrawalForm(prefix="withdraw")
     income_form = IncomeForm(prefix="income")
     if withdraw_form.submit.data and withdraw_form.validate_on_submit():
         movement = Movement(
-            user_id=session.get("user_id"),
+            user_id=user.id,
             action="cash_withdrawal",
             amount=withdraw_form.amount.data,
             description=withdraw_form.description.data,
@@ -194,8 +214,10 @@ def cash():
         db.session.commit()
         return redirect(url_for("cash"))
     if income_form.submit.data and income_form.validate_on_submit():
+        if user.role != "admin":
+            return redirect(url_for("cash"))
         movement = Movement(
-            user_id=session.get("user_id"),
+            user_id=user.id,
             action="cash_income",
             amount=income_form.amount.data,
             description=income_form.description.data,
@@ -233,6 +255,7 @@ def cash():
         total_withdrawals=total_withdrawals,
         total_incomes=total_incomes,
         cash_total=cash_total,
+        is_admin=user.role == "admin",
     )
 
 
