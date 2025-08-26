@@ -2,4 +2,5 @@ Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
 pytest
 pytest-env
-
+flask_wtf
+flask_migrate

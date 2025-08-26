@@ -1,5 +1,0 @@
-Si tu compilador marca errores por PlaceholderText en TextBox, cambia esos TextBox a:
-  <TextBox ...>
-     <TextBox.Tag>Hint</TextBox.Tag>
-  </TextBox>
-o instala MaterialDesignThemes que ya viene referenciado para usar HintAssist.
