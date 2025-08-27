@@ -32,6 +32,39 @@ with app.app_context():
     db.create_all()
 
     inspector = inspect(db.engine)
+    if "client" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("client")]
+        if "address" not in columns:
+            db.session.execute(
+                text("ALTER TABLE client ADD COLUMN address VARCHAR(200)")
+            )
+            db.session.commit()
+        if "phone" not in columns:
+            db.session.execute(
+                text("ALTER TABLE client ADD COLUMN phone VARCHAR(20)")
+            )
+            db.session.commit()
+        indexes = [idx["name"] for idx in inspector.get_indexes("client")]
+        if "ix_client_document" not in indexes:
+            # remove duplicate documents before creating the unique index
+            duplicate_ids = db.session.execute(
+                text(
+                    """
+                    SELECT id FROM client
+                    WHERE id NOT IN (
+                        SELECT MIN(id) FROM client GROUP BY document
+                    )
+                    """
+                )
+            ).scalars()
+            for dup_id in duplicate_ids:
+                db.session.execute(text("DELETE FROM client WHERE id = :id"), {"id": dup_id})
+            db.session.commit()
+
+            db.session.execute(
+                text("CREATE UNIQUE INDEX ix_client_document ON client (document)")
+            )
+            db.session.commit()
     if "payment" in inspector.get_table_names():
         columns = [col["name"] for col in inspector.get_columns("payment")]
         if "method" not in columns:
@@ -110,7 +143,12 @@ def index():
 def new_client():
     form = ClientForm()
     if form.validate_on_submit():
-        client = Client(name=form.name.data, document=form.document.data)
+        client = Client(
+            name=form.name.data,
+            document=form.document.data,
+            address=form.address.data,
+            phone=form.phone.data,
+        )
         db.session.add(client)
         db.session.commit()
         movement = Movement(
