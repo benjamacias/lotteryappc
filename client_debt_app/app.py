@@ -46,10 +46,24 @@ with app.app_context():
             db.session.commit()
         indexes = [idx["name"] for idx in inspector.get_indexes("client")]
         if "ix_client_document" not in indexes:
-            db.session.execute(
+            # remove duplicate documents before creating the unique index
+            duplicate_ids = db.session.execute(
                 text(
-                    "CREATE UNIQUE INDEX ix_client_document ON client (document)"
+                    """
+                    SELECT id FROM client
+                    WHERE id NOT IN (
+                        SELECT MIN(id) FROM client GROUP BY document
+                    )
+                    """
                 )
+            ).scalars()
+            for dup_id in duplicate_ids:
+                db.session.execute(text("DELETE FROM client WHERE id = :id"), {"id": dup_id})
+            db.session.commit()
+
+            db.session.execute(
+                text("CREATE UNIQUE INDEX ix_client_document ON client (document)")
+
             )
             db.session.commit()
     if "payment" in inspector.get_table_names():
