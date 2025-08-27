@@ -12,6 +12,14 @@
       {{ form.document.label(class="block mb-1") }}
       {{ form.document(class="border rounded w-full px-3 py-2") }}
     </div>
+    <div>
+      {{ form.address.label(class="block mb-1") }}
+      {{ form.address(class="border rounded w-full px-3 py-2") }}
+    </div>
+    <div>
+      {{ form.phone.label(class="block mb-1") }}
+      {{ form.phone(class="border rounded w-full px-3 py-2") }}
+    </div>
     <div class="space-x-2">
       {{ form.submit(class="bg-blue-500 text-white px-4 py-2 rounded") }}
       <a href="{{ url_for('index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</a>
