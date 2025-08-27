@@ -1,26 +1,30 @@
 {% extends 'layout.html' %}
 {% block title %}Deudas{% endblock %}
 {% block content %}
+<div class="container mx-auto p-4">
   <h1 class="text-2xl font-bold mb-4">Deudas</h1>
-  <a href="{{ url_for('new_debt') }}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded mb-4">Nueva deuda</a>
-  <table class="min-w-full bg-white">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Cliente</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for d in debts %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ d.date.strftime('%Y-%m-%d') }}</td>
-        <td class="py-2 px-3">{{ d.client.name }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(d.amount) }}</td>
-        <td class="py-2 px-3">{{ d.description }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <a href="{{ url_for('new_debt') }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow mb-4">Nueva deuda</a>
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 overflow-x-auto">
+    <table class="min-w-full bg-white dark:bg-gray-800">
+      <thead class="bg-gray-100 dark:bg-gray-700/50">
+        <tr class="border-b dark:border-gray-700">
+          <th class="text-left py-2 px-3">Fecha</th>
+          <th class="text-left py-2 px-3">Cliente</th>
+          <th class="text-left py-2 px-3">Monto</th>
+          <th class="text-left py-2 px-3">Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in debts %}
+        <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+          <td class="py-2 px-3">{{ d.date.strftime('%Y-%m-%d') }}</td>
+          <td class="py-2 px-3">{{ d.client.name }}</td>
+          <td class="py-2 px-3 font-semibold">${{ '%.2f'|format(d.amount) }}</td>
+          <td class="py-2 px-3">{{ d.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

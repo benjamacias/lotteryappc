@@ -1,114 +1,164 @@
 {% extends 'layout.html' %}
 {% block title %}Caja diaria{% endblock %}
 {% block content %}
-  <h1 class="text-2xl font-bold mb-4">Caja diaria</h1>
-  <form method="get" class="mb-4">
-    <div class="flex max-w-sm">
-      <input type="date" name="date" class="border rounded-l px-3 py-2 w-full" value="{{ date.strftime('%Y-%m-%d') }}">
-      <button class="bg-blue-500 text-white px-4 py-2 rounded-r" type="submit">Cambiar</button>
-    </div>
-  </form>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Caja diaria</h1>
+    <form method="get" class="mb-0">
+      <div class="flex max-w-sm">
+        <input type="date" name="date"
+               class="border rounded-l px-3 py-2 w-full dark:bg-gray-900 dark:border-gray-700"
+               value="{{ date.strftime('%Y-%m-%d') }}">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r" type="submit">Cambiar</button>
+      </div>
+    </form>
+  </div>
 
-  <h2 class="text-xl font-semibold mb-2">Pagos</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Cliente</th>
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Método</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in payments %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ p.client.name }}</td>
-        <td class="py-2 px-3">{{ p.date.strftime('%d/%m/%Y') }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(p.amount) }}</td>
-        <td class="py-2 px-3">{{ p.method_label }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="mb-4 font-semibold">Total efectivo: ${{ '%.2f'|format(total_payments) }}</div>
-
-  <h2 class="text-xl font-semibold mb-2">Ingresos</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for i in incomes %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ i.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(i.amount) }}</td>
-        <td class="py-2 px-3">{{ i.description or '' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="mb-4 font-semibold">Total ingresos: ${{ '%.2f'|format(total_incomes) }}</div>
-
-  <h2 class="text-xl font-semibold mb-2">Retiros</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for w in withdrawals %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ w.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(w.amount) }}</td>
-        <td class="py-2 px-3">{{ w.description or '' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="mb-4 font-semibold">Total retiros: ${{ '%.2f'|format(total_withdrawals) }}</div>
-
-  {% if is_admin %}
-  <h3 class="text-lg font-semibold mb-2">Ingresar efectivo</h3>
-  <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    {{ income_form.csrf_token }}
-    <div>
-      {{ income_form.amount.label(class="block mb-1") }}
-      {{ income_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+  <!-- Resumen del día -->
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="text-sm text-gray-500 dark:text-gray-400">Total efectivo</div>
+      <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">${{ '%.2f'|format(total_payments) }}</div>
     </div>
-    <div class="md:col-span-2">
-      {{ income_form.description.label(class="block mb-1") }}
-      {{ income_form.description(class="border rounded w-full px-3 py-2") }}
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="text-sm text-gray-500 dark:text-gray-400">Total ingresos</div>
+      <div class="mt-1 text-2xl font-semibold text-green-700 dark:text-green-300">${{ '%.2f'|format(total_incomes) }}</div>
     </div>
-    <div class="md:col-span-3">
-      {{ income_form.submit(class="bg-green-500 text-white px-4 py-2 rounded") }}
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="text-sm text-gray-500 dark:text-gray-400">Total retiros</div>
+      <div class="mt-1 text-2xl font-semibold text-yellow-700 dark:text-yellow-300">${{ '%.2f'|format(total_withdrawals) }}</div>
     </div>
-  </form>
-  {% endif %}
+  </div>
 
-  <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
-  <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    {{ withdraw_form.csrf_token }}
-    <div>
-      {{ withdraw_form.amount.label(class="block mb-1") }}
-      {{ withdraw_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+  <!-- Pagos -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Pagos</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr class="border-b dark:border-gray-700">
+            <th class="text-left py-2 px-3">Cliente</th>
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Método</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ p.client.name }}</td>
+            <td class="py-2 px-3">{{ p.date.strftime('%d/%m/%Y') }}</td>
+            <td class="py-2 px-3 font-semibold">${{ '%.2f'|format(p.amount) }}</td>
+            <td class="py-2 px-3">{{ p.method_label }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div class="md:col-span-2">
-      {{ withdraw_form.description.label(class="block mb-1") }}
-      {{ withdraw_form.description(class="border rounded w-full px-3 py-2") }}
-    </div>
-    <div class="md:col-span-3">
-      {{ withdraw_form.submit(class="bg-yellow-500 text-white px-4 py-2 rounded") }}
-    </div>
-  </form>
+  </div>
 
-  <div class="mb-4 font-semibold">Total en caja: ${{ '%.2f'|format(cash_total) }}</div>
+  <!-- Ingresos -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Ingresos</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr class="border-b dark:border-gray-700">
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in incomes %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ i.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td class="py-2 px-3 font-semibold text-green-700 dark:text-green-300">${{ '%.2f'|format(i.amount) }}</td>
+            <td class="py-2 px-3">{{ i.description or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-  <a href="{{ url_for('index') }}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded">Volver</a>
+  <!-- Retiros -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Retiros</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr class="border-b dark:border-gray-700">
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for w in withdrawals %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ w.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td class="py-2 px-3 font-semibold text-yellow-700 dark:text-yellow-300">${{ '%.2f'|format(w.amount) }}</td>
+            <td class="py-2 px-3">{{ w.description or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Formularios -->
+  <div class="grid gap-6 md:grid-cols-2">
+    {% if is_admin %}
+    <div id="form-income" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <h3 class="text-lg font-semibold mb-2">Ingresar efectivo</h3>
+      <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{ income_form.csrf_token }}
+        <div>
+          {{ income_form.amount.label(class="block mb-1") }}
+          {{ income_form.amount(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700", step="0.01") }}
+        </div>
+        <div class="md:col-span-2">
+          {{ income_form.description.label(class="block mb-1") }}
+          {{ income_form.description(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
+        </div>
+        <div class="md:col-span-3">
+          {{ income_form.submit(class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded") }}
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <div id="form-withdraw" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <h3 class="text-lg font-semibold mb-2">Retirar efectivo</h3>
+      <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{ withdraw_form.csrf_token }}
+        <div>
+          {{ withdraw_form.amount.label(class="block mb-1") }}
+          {{ withdraw_form.amount(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700", step="0.01") }}
+        </div>
+        <div class="md:col-span-2">
+          {{ withdraw_form.description.label(class="block mb-1") }}
+          {{ withdraw_form.description(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
+        </div>
+        <div class="md:col-span-3">
+          {{ withdraw_form.submit(class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded") }}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Total final y volver -->
+  <div class="flex items-center justify-between">
+    <div class="text-lg font-semibold">
+      Total en caja:
+      <span class="inline-block ml-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700">
+        ${{ '%.2f'|format(cash_total) }}
+      </span>
+    </div>
+    <a href="{{ url_for('index') }}" class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+      Volver
+    </a>
+  </div>
+</div>
 {% endblock %}

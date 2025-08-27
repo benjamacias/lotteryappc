@@ -1,28 +1,33 @@
 {% extends 'layout.html' %}
 {% block title %}Nuevo cliente{% endblock %}
 {% block content %}
-  <h1 class="text-2xl font-bold mb-4">Nuevo cliente</h1>
-  <form method="post" class="space-y-4">
+<div class="max-w-xl mx-auto">
+  <h1 class="text-2xl font-bold mb-6">Nuevo cliente</h1>
+  <form method="post" class="space-y-5 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
     {{ form.csrf_token }}
     <div>
-      {{ form.name.label(class="block mb-1") }}
-      {{ form.name(class="border rounded w-full px-3 py-2") }}
+      {{ form.name.label(class="block mb-1 font-medium") }}
+      {{ form.name(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
     </div>
     <div>
-      {{ form.document.label(class="block mb-1") }}
-      {{ form.document(class="border rounded w-full px-3 py-2") }}
+      {{ form.document.label(class="block mb-1 font-medium") }}
+      {{ form.document(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
     </div>
     <div>
-      {{ form.address.label(class="block mb-1") }}
-      {{ form.address(class="border rounded w-full px-3 py-2") }}
+      {{ form.address.label(class="block mb-1 font-medium") }}
+      {{ form.address(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
     </div>
     <div>
-      {{ form.phone.label(class="block mb-1") }}
-      {{ form.phone(class="border rounded w-full px-3 py-2") }}
+      {{ form.phone.label(class="block mb-1 font-medium") }}
+      {{ form.phone(class="border rounded w-full px-3 py-2 dark:bg-gray-900 dark:border-gray-700") }}
     </div>
-    <div class="space-x-2">
-      {{ form.submit(class="bg-blue-500 text-white px-4 py-2 rounded") }}
-      <a href="{{ url_for('index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</a>
+    <div class="flex gap-3">
+      {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow") }}
+      <a href="{{ url_for('index') }}"
+         class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow">
+        Cancelar
+      </a>
     </div>
   </form>
+</div>
 {% endblock %}

@@ -1,32 +1,59 @@
 {% extends 'layout.html' %}
 {% block title %}Clientes{% endblock %}
 {% block content %}
-  <div class="flex justify-between items-center mb-4">
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold">Clientes</h1>
-    <a href="{{ url_for('new_client') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Nuevo cliente</a>
+    <a href="{{ url_for('new_client') }}"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
+      Nuevo cliente
+    </a>
   </div>
-  <form method="get" class="mb-4">
+
+  <!-- Buscador -->
+  <form method="get" class="max-w-md">
     <div class="flex">
-      <input type="text" name="q" class="border rounded-l px-4 py-2 w-full" placeholder="Buscar por nombre" value="{{ q or '' }}">
-      <button class="bg-gray-200 px-4 py-2 rounded-r" type="submit">Buscar</button>
+      <input type="text" name="q"
+             class="border rounded-l px-4 py-2 w-full dark:bg-gray-900 dark:border-gray-700"
+             placeholder="Buscar por nombre o documento"
+             value="{{ q or '' }}">
+      <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-r"
+              type="submit">
+        Buscar
+      </button>
     </div>
   </form>
-  <table class="min-w-full bg-white">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Nombre</th>
-        <th class="text-left py-2 px-3">Documento</th>
-        <th class="text-left py-2 px-3">Deuda total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in clients %}
-      <tr class="border-b">
-        <td class="py-2 px-3"><a href="{{ url_for('client_detail', client_id=c.id) }}" class="text-blue-600 hover:underline">{{ c.name }}</a></td>
-        <td class="py-2 px-3">{{ c.document }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(c.total_debt) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+  <!-- Tabla -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr class="border-b dark:border-gray-700">
+            <th class="text-left py-2 px-3">Nombre</th>
+            <th class="text-left py-2 px-3">Documento</th>
+            <th class="text-left py-2 px-3">Deuda total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clients %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">
+              <a href="{{ url_for('client_detail', client_id=c.id) }}"
+                 class="text-blue-600 hover:underline dark:text-blue-400">
+                {{ c.name }}
+              </a>
+            </td>
+            <td class="py-2 px-3">{{ c.document }}</td>
+            <td class="py-2 px-3 font-semibold {% if c.total_debt > 0 %}text-red-600{% else %}text-green-700{% endif %}">
+              ${{ '%.2f'|format(c.total_debt) }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}

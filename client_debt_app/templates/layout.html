@@ -1,39 +1,155 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="h-full">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}App{% endblock %}</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tema: prevenir FOUC y persistir preferencia -->
+    <script>
+      (() => {
+        const k = 'theme';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const pref = localStorage.getItem(k);
+        const dark = pref ? pref === 'dark' : prefersDark;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+
     {% block head_extra %}{% endblock %}
   </head>
-  <body class="bg-gray-100">
-    <nav class="bg-blue-600 mb-6">
-      <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center text-white">
-        <a class="font-semibold text-lg" href="{{ url_for('index') }}">Inicio</a>
-        <div class="space-x-4">
-          {% if session.get('user_id') %}
-            <a href="{{ url_for('index') }}" class="hover:underline">Clientes</a>
-            <a href="{{ url_for('debts') }}" class="hover:underline">Deudas</a>
-            <a href="{{ url_for('cash') }}" class="hover:underline">Caja</a>
-            <a href="{{ url_for('charts') }}" class="hover:underline">Gráficos</a>
-            <a href="{{ url_for('logout') }}" class="bg-blue-800 hover:bg-blue-900 px-3 py-1 rounded">Salir</a>
-          {% else %}
-            <a href="{{ url_for('login') }}" class="hover:underline">Ingresar</a>
-          {% endif %}
+
+  <body class="h-full bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 bg-blue-600/95 backdrop-blur supports-[backdrop-filter]:bg-blue-600/80 dark:bg-blue-700/80 shadow">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex h-14 items-center justify-between">
+          <a class="font-semibold text-lg tracking-tight" href="{{ url_for('index') }}">Inicio</a>
+
+          <div class="hidden md:flex items-center gap-1">
+            {% if session.get('user_id') %}
+              {% set ep = request.endpoint %}
+              <a href="{{ url_for('index') }}"
+                 class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 {{ 'bg-white/15' if ep in ['index','clients'] else '' }}">
+                Clientes
+              </a>
+              <a href="{{ url_for('debts') }}"
+                 class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 {{ 'bg-white/15' if ep == 'debts' else '' }}">
+                Deudas
+              </a>
+              <a href="{{ url_for('cash') }}"
+                 class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 {{ 'bg-white/15' if ep == 'cash' else '' }}">
+                Caja
+              </a>
+              <a href="{{ url_for('charts') }}"
+                 class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 {{ 'bg-white/15' if ep == 'charts' else '' }}">
+                Gráficos
+              </a>
+              <a href="{{ url_for('logout') }}"
+                 class="ml-1 bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded-md text-sm font-semibold">
+                Salir
+              </a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">
+                Ingresar
+              </a>
+            {% endif %}
+          </div>
+
+          <!-- Controles -->
+          <div class="flex items-center gap-2">
+            <button id="themeToggle" type="button"
+              class="inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-sm bg-white/10 hover:bg_white/20 hover:bg-white/20 text-white">
+              Tema
+            </button>
+
+            <!-- Menú móvil -->
+            <button id="menuBtn" class="md:hidden inline-flex items-center justify-center rounded-md px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white">
+              Menú
+            </button>
+          </div>
+        </div>
+
+        <!-- Drawer móvil -->
+        <div id="mobileMenu" class="md:hidden hidden pb-3">
+          <div class="flex flex-col gap-1">
+            {% if session.get('user_id') %}
+              <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md hover:bg-white/10">Clientes</a>
+              <a href="{{ url_for('debts') }}" class="px-3 py-2 rounded-md hover:bg-white/10">Deudas</a>
+              <a href="{{ url_for('cash') }}" class="px-3 py-2 rounded-md hover:bg-white/10">Caja</a>
+              <a href="{{ url_for('charts') }}" class="px-3 py-2 rounded-md hover:bg-white/10">Gráficos</a>
+              <a href="{{ url_for('logout') }}" class="px-3 py-2 rounded-md bg-blue-800 hover:bg-blue-900 mt-1">Salir</a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="px-3 py-2 rounded-md hover:bg-white/10">Ingresar</a>
+            {% endif %}
+          </div>
         </div>
       </div>
     </nav>
-    <div class="max-w-5xl mx-auto px-4 py-4 bg-white shadow rounded">
+
+    <!-- Contenido -->
+    <main class="max-w-6xl mx-auto px-4 py-6">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          {% for category, message in messages %}
-            <div class="mb-4 p-2 rounded {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">{{ message }}</div>
-          {% endfor %}
+          <div class="space-y-2 mb-4">
+            {% for category, message in messages %}
+              {% set is_error = category == 'error' %}
+              <div class="flex items-start gap-3 p-3 rounded-md border
+                          {{ 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-200 dark:border-red-800' if is_error
+                             else 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-200 dark:border-green-800' }}">
+                <div class="mt-0.5 h-2.5 w-2.5 rounded-full
+                            {{ 'bg-red-500' if is_error else 'bg-green-500' }}"></div>
+                <div class="text-sm leading-5">{{ message }}</div>
+              </div>
+            {% endfor %}
+          </div>
         {% endif %}
       {% endwith %}
-      {% block content %}{% endblock %}
-    </div>
+
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <!-- Footer simple -->
+    <footer class="mt-8 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+      <div class="max-w-6xl mx-auto px-4">
+        © <span id="year"></span> • Sistema
+      </div>
+    </footer>
+
     {% block scripts %}{% endblock %}
+
+    <!-- Scripts base -->
+    <script>
+      // Toggle de tema
+      (function () {
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const c = document.documentElement.classList;
+            const dark = !c.contains('dark');
+            c.toggle('dark', dark);
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+          });
+        }
+      })();
+
+      // Menú móvil
+      (function () {
+        const b = document.getElementById('menuBtn');
+        const m = document.getElementById('mobileMenu');
+        if (b && m) b.addEventListener('click', () => m.classList.toggle('hidden'));
+      })();
+
+      // Año en footer
+      (function () {
+        const y = document.getElementById('year');
+        if (y) y.textContent = new Date().getFullYear();
+      })();
+    </script>
   </body>
 </html>

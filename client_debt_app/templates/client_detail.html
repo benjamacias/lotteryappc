@@ -1,113 +1,156 @@
 {% extends 'layout.html' %}
 {% block title %}{{ client.name }}{% endblock %}
 {% block content %}
-  <h1 class="text-2xl font-bold mb-4">{{ client.name }}</h1>
-  <p class="mb-1"><strong>Documento:</strong> {{ client.document }}</p>
-  <p class="mb-1"><strong>Dirección:</strong> {{ client.address or '-' }}</p>
-  <p class="mb-1"><strong>Teléfono:</strong> {{ client.phone or '-' }}</p>
-  <p class="mb-4"><strong>Deuda total:</strong> ${{ '%.2f'|format(client.total_debt) }}</p>
-
-  <h2 class="text-xl font-semibold mb-2">Deudas</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for d in client.debts %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ d.date.strftime('%d/%m/%Y') }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(d.amount) }}</td>
-        <td class="py-2 px-3">{{ d.description }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <h3 class="text-lg font-semibold mb-2">Agregar deuda</h3>
-  <form action="{{ url_for('add_debt', client_id=client.id) }}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    {{ debt_form.csrf_token }}
+<div class="container mx-auto p-4 space-y-6">
+  <div class="flex items-start justify-between">
     <div>
-      {{ debt_form.date.label(class="block mb-1") }}
-      {{ debt_form.date(class="border rounded w-full px-3 py-2") }}
+      <h1 class="text-3xl font-bold">{{ client.name }}</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-300">Documento: {{ client.document }}</p>
     </div>
-    <div>
-      {{ debt_form.amount.label(class="block mb-1") }}
-      {{ debt_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+    <div class="text-right">
+      <span class="inline-block text-sm bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-3 py-1 rounded-full">
+        Deuda total: ${{ '%.2f'|format(client.total_debt) }}
+      </span>
     </div>
-    <div class="md:col-span-1">
-      {{ debt_form.description.label(class="block mb-1") }}
-      {{ debt_form.description(class="border rounded w-full px-3 py-2") }}
-    </div>
-    <div class="md:col-span-3">
-      {{ debt_form.submit(class="bg-blue-500 text-white px-4 py-2 rounded") }}
-    </div>
-  </form>
+  </div>
 
-  <h2 class="text-xl font-semibold mb-2">Pagos</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Método</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in client.payments %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ p.date.strftime('%d/%m/%Y') }}</td>
-        <td class="py-2 px-3">${{ '%.2f'|format(p.amount) }}</td>
-        <td class="py-2 px-3">{{ p.method_label }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <h2 class="text-sm font-semibold mb-2">Contacto</h2>
+      <p class="mb-1"><strong>Dirección:</strong> {{ client.address or '-' }}</p>
+      <p class="mb-1"><strong>Teléfono:</strong> {{ client.phone or '-' }}</p>
+      <a href="{{ url_for('index') }}" class="inline-block mt-3 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">Volver</a>
+    </div>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <h2 class="text-sm font-semibold mb-2">Resumen</h2>
+      <div class="flex gap-2 flex-wrap">
+        <span class="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Deudas: {{ client.debts|length }}</span>
+        <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Pagos: {{ client.payments|length }}</span>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <h2 class="text-sm font-semibold mb-2">Acciones rápidas</h2>
+      <a href="#form-debt" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mr-2">Agregar deuda</a>
+      <a href="#form-payment" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Agregar pago</a>
+    </div>
+  </div>
 
-  <h3 class="text-lg font-semibold mb-2">Agregar pago</h3>
-  <form action="{{ url_for('add_payment', client_id=client.id) }}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    {{ payment_form.csrf_token }}
-    <div>
-      {{ payment_form.date.label(class="block mb-1") }}
-      {{ payment_form.date(class="border rounded w-full px-3 py-2") }}
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Deudas</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr>
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in client.debts %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ d.date.strftime('%d/%m/%Y') }}</td>
+            <td class="py-2 px-3 font-semibold text-red-600">${{ '%.2f'|format(d.amount) }}</td>
+            <td class="py-2 px-3">{{ d.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div>
-      {{ payment_form.amount.label(class="block mb-1") }}
-      {{ payment_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
-    </div>
-    <div>
-      {{ payment_form.method.label(class="block mb-1") }}
-      {{ payment_form.method(class="border rounded w-full px-3 py-2") }}
-    </div>
-    <div class="md:col-span-3">
-      {{ payment_form.submit(class="bg-green-500 text-white px-4 py-2 rounded") }}
-    </div>
-  </form>
+  </div>
 
-  <h2 class="text-xl font-semibold mb-2">Movimientos</h2>
-  <table class="min-w-full bg-white mb-4">
-    <thead>
-      <tr class="border-b">
-        <th class="text-left py-2 px-3">Fecha</th>
-        <th class="text-left py-2 px-3">Acción</th>
-        <th class="text-left py-2 px-3">Monto</th>
-        <th class="text-left py-2 px-3">Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for m in client.movements %}
-      <tr class="border-b">
-        <td class="py-2 px-3">{{ m.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
-        <td class="py-2 px-3">{{ m.action }}</td>
-        <td class="py-2 px-3">{% if m.amount %}${{ '%.2f'|format(m.amount) }}{% else %}-{% endif %}</td>
-        <td class="py-2 px-3">{{ m.description }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div id="form-debt" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h3 class="text-lg font-semibold mb-2">Agregar deuda</h3>
+    <form action="{{ url_for('add_debt', client_id=client.id) }}" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {{ debt_form.csrf_token }}
+      <div>
+        {{ debt_form.date.label(class="block mb-1") }}
+        {{ debt_form.date(class="border rounded w-full px-3 py-2") }}
+      </div>
+      <div>
+        {{ debt_form.amount.label(class="block mb-1") }}
+        {{ debt_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+      </div>
+      <div class="md:col-span-2">
+        {{ debt_form.description.label(class="block mb-1") }}
+        {{ debt_form.description(class="border rounded w-full px-3 py-2") }}
+      </div>
+      <div class="md:col-span-4">
+        {{ debt_form.submit(class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded") }}
+      </div>
+    </form>
+  </div>
 
-  <a href="{{ url_for('index') }}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded">Volver</a>
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Pagos</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr>
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Método</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in client.payments %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ p.date.strftime('%d/%m/%Y') }}</td>
+            <td class="py-2 px-3 font-semibold text-green-700">${{ '%.2f'|format(p.amount) }}</td>
+            <td class="py-2 px-3">{{ p.method_label }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="form-payment" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h3 class="text-lg font-semibold mb-2">Agregar pago</h3>
+    <form action="{{ url_for('add_payment', client_id=client.id) }}" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {{ payment_form.csrf_token }}
+      <div>
+        {{ payment_form.date.label(class="block mb-1") }}
+        {{ payment_form.date(class="border rounded w-full px-3 py-2") }}
+      </div>
+      <div>
+        {{ payment_form.amount.label(class="block mb-1") }}
+        {{ payment_form.amount(class="border rounded w-full px-3 py-2", step="0.01") }}
+      </div>
+      <div>
+        {{ payment_form.method.label(class="block mb-1") }}
+        {{ payment_form.method(class="border rounded w-full px-3 py-2") }}
+      </div>
+      <div class="md:col-span-4">
+        {{ payment_form.submit(class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded") }}
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Movimientos</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <thead class="bg-gray-100 dark:bg-gray-700/50">
+          <tr>
+            <th class="text-left py-2 px-3">Fecha</th>
+            <th class="text-left py-2 px-3">Acción</th>
+            <th class="text-left py-2 px-3">Monto</th>
+            <th class="text-left py-2 px-3">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in client.movements %}
+          <tr class="border-b dark:border-gray-700 odd:bg-gray-50 dark:odd:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/40">
+            <td class="py-2 px-3">{{ m.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td class="py-2 px-3">{{ m.action }}</td>
+            <td class="py-2 px-3">{% if m.amount %}${{ '%.2f'|format(m.amount) }}{% else %}-{% endif %}</td>
+            <td class="py-2 px-3">{{ m.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}
