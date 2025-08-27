@@ -63,6 +63,7 @@ with app.app_context():
 
             db.session.execute(
                 text("CREATE UNIQUE INDEX ix_client_document ON client (document)")
+
             )
             db.session.commit()
     if "payment" in inspector.get_table_names():
