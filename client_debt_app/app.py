@@ -1,7 +1,7 @@
 import os
 from datetime import date, datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
@@ -32,6 +32,39 @@ with app.app_context():
     db.create_all()
 
     inspector = inspect(db.engine)
+    if "client" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("client")]
+        if "address" not in columns:
+            db.session.execute(
+                text("ALTER TABLE client ADD COLUMN address VARCHAR(200)")
+            )
+            db.session.commit()
+        if "phone" not in columns:
+            db.session.execute(
+                text("ALTER TABLE client ADD COLUMN phone VARCHAR(20)")
+            )
+            db.session.commit()
+        indexes = [idx["name"] for idx in inspector.get_indexes("client")]
+        if "ix_client_document" not in indexes:
+            # remove duplicate documents before creating the unique index
+            duplicate_ids = db.session.execute(
+                text(
+                    """
+                    SELECT id FROM client
+                    WHERE id NOT IN (
+                        SELECT MIN(id) FROM client GROUP BY document
+                    )
+                    """
+                )
+            ).scalars()
+            for dup_id in duplicate_ids:
+                db.session.execute(text("DELETE FROM client WHERE id = :id"), {"id": dup_id})
+            db.session.commit()
+
+            db.session.execute(
+                text("CREATE UNIQUE INDEX ix_client_document ON client (document)")
+            )
+            db.session.commit()
     if "payment" in inspector.get_table_names():
         columns = [col["name"] for col in inspector.get_columns("payment")]
         if "method" not in columns:
@@ -92,6 +125,13 @@ def admin_required(fn):
     return wrapper
 
 
+def flash_form_errors(form):
+    for field, errors in form.errors.items():
+        label = getattr(form, field).label.text
+        for error in errors:
+            flash(f"{label}: {error}", "error")
+
+
 @app.route("/")
 @login_required
 
@@ -110,7 +150,12 @@ def index():
 def new_client():
     form = ClientForm()
     if form.validate_on_submit():
-        client = Client(name=form.name.data, document=form.document.data)
+        client = Client(
+            name=form.name.data,
+            document=form.document.data,
+            address=form.address.data,
+            phone=form.phone.data,
+        )
         db.session.add(client)
         db.session.commit()
         movement = Movement(
@@ -123,6 +168,8 @@ def new_client():
         db.session.commit()
 
         return redirect(url_for("index"))
+    if request.method == "POST":
+        flash_form_errors(form)
     return render_template("new_client.html", form=form)
 
 
@@ -162,6 +209,8 @@ def add_debt(client_id: int):
         db.session.add(movement)
         db.session.commit()
         return redirect(url_for("client_detail", client_id=client.id))
+    if request.method == "POST":
+        flash_form_errors(form)
     payment_form = PaymentForm()
     return render_template(
         "client_detail.html", client=client, debt_form=form, payment_form=payment_form
@@ -191,6 +240,8 @@ def add_payment(client_id: int):
         db.session.add(movement)
         db.session.commit()
         return redirect(url_for("client_detail", client_id=client.id))
+    if request.method == "POST":
+        flash_form_errors(form)
     debt_form = DebtForm()
     return render_template(
         "client_detail.html", client=client, debt_form=debt_form, payment_form=form
@@ -203,28 +254,32 @@ def cash():
     user = User.query.get(session.get("user_id"))
     withdraw_form = WithdrawalForm(prefix="withdraw")
     income_form = IncomeForm(prefix="income")
-    if withdraw_form.submit.data and withdraw_form.validate_on_submit():
-        movement = Movement(
-            user_id=user.id,
-            action="cash_withdrawal",
-            amount=withdraw_form.amount.data,
-            description=withdraw_form.description.data,
-        )
-        db.session.add(movement)
-        db.session.commit()
-        return redirect(url_for("cash"))
-    if income_form.submit.data and income_form.validate_on_submit():
-        if user.role != "admin":
+    if withdraw_form.submit.data:
+        if withdraw_form.validate_on_submit():
+            movement = Movement(
+                user_id=user.id,
+                action="cash_withdrawal",
+                amount=withdraw_form.amount.data,
+                description=withdraw_form.description.data,
+            )
+            db.session.add(movement)
+            db.session.commit()
             return redirect(url_for("cash"))
-        movement = Movement(
-            user_id=user.id,
-            action="cash_income",
-            amount=income_form.amount.data,
-            description=income_form.description.data,
-        )
-        db.session.add(movement)
-        db.session.commit()
-        return redirect(url_for("cash"))
+        flash_form_errors(withdraw_form)
+    elif income_form.submit.data:
+        if income_form.validate_on_submit():
+            if user.role != "admin":
+                return redirect(url_for("cash"))
+            movement = Movement(
+                user_id=user.id,
+                action="cash_income",
+                amount=income_form.amount.data,
+                description=income_form.description.data,
+            )
+            db.session.add(movement)
+            db.session.commit()
+            return redirect(url_for("cash"))
+        flash_form_errors(income_form)
 
     date_str = request.args.get("date")
     if date_str:
@@ -320,6 +375,8 @@ def new_debt():
         db.session.add(movement)
         db.session.commit()
         return redirect(url_for("debts"))
+    if request.method == "POST":
+        flash_form_errors(form)
     return render_template("new_debt.html", form=form)
 
 
@@ -347,7 +404,9 @@ def login():
         if user and check_password_hash(user.password_hash, form.password.data):
             session["user_id"] = user.id
             return redirect(url_for("index"))
-        return render_template("login.html", form=form, error="Credenciales inválidas")
+        flash("Credenciales inválidas", "error")
+    elif request.method == "POST":
+        flash_form_errors(form)
     return render_template("login.html", form=form)
 
 
@@ -357,12 +416,13 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         if User.query.filter_by(username=username).first():
-            return render_template("register.html", error="Usuario ya existe")
-        pw_hash = generate_password_hash(password)
-        user = User(username=username, password_hash=pw_hash, role="user")
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("login"))
+            flash("Usuario ya existe", "error")
+        else:
+            pw_hash = generate_password_hash(password)
+            user = User(username=username, password_hash=pw_hash, role="user")
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for("login"))
     return render_template("register.html")
 
 

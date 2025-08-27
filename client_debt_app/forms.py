@@ -7,7 +7,8 @@ from wtforms import (
     SubmitField,
     SelectField,
 )
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
+from models import Client
 
 
 class LoginForm(FlaskForm):
@@ -19,7 +20,13 @@ class LoginForm(FlaskForm):
 class ClientForm(FlaskForm):
     name = StringField("Nombre", validators=[DataRequired(), Length(max=100)])
     document = StringField("Documento", validators=[DataRequired(), Length(max=100)])
+    address = StringField("Dirección", validators=[Length(max=200)])
+    phone = StringField("Teléfono", validators=[Length(max=20)])
     submit = SubmitField("Guardar")
+
+    def validate_document(self, field):
+        if Client.query.filter_by(document=field.data).first():
+            raise ValidationError("Documento ya registrado")
 
 
 class DebtForm(FlaskForm):

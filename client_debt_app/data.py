@@ -13,6 +13,8 @@ class Client:
     id: int
     name: str
     document: str
+    address: str = ""
+    phone: str = ""
     debts: List[Debt] = field(default_factory=list)
 
     @property
