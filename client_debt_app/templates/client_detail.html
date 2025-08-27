@@ -3,6 +3,8 @@
 {% block content %}
   <h1 class="text-2xl font-bold mb-4">{{ client.name }}</h1>
   <p class="mb-1"><strong>Documento:</strong> {{ client.document }}</p>
+  <p class="mb-1"><strong>Dirección:</strong> {{ client.address or '-' }}</p>
+  <p class="mb-1"><strong>Teléfono:</strong> {{ client.phone or '-' }}</p>
   <p class="mb-4"><strong>Deuda total:</strong> ${{ '%.2f'|format(client.total_debt) }}</p>
 
   <h2 class="text-xl font-semibold mb-2">Deudas</h2>
